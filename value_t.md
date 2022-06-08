@@ -2,7 +2,7 @@
 
 ## value_t
 
-value_t 是閉包功能的關鍵 因為同樣一個結構 可以放入 number, object(uion: dict, string, func) 和 null不能的資料
+value_t 是閉包功能的關鍵 因為同樣一個結構 可以放入 number, object(uion: dict, string, func) 和 null不同的資料
 
 他以可能犧牲一些空間 來達成像是弱型態的功能
 
