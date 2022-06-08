@@ -1,4 +1,4 @@
-# Toyjs-
+# Toyjs
 * 來源自[ccc-c/toyjs: Tiny JavaScriptish interpreter (github.com)](https://github.com/ccc-c/toyjs)
 
 ## Toyjs報告
@@ -21,6 +21,6 @@
 
 
 
-[new_object](./new_object.txt)
+[value_t](./value_t.txt)
 
 [Type](./Type.txt)
