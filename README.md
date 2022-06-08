@@ -21,6 +21,4 @@
 
 
 
-[value_t](./value_t.txt)
-
-[Type](./Type.txt)
+[main](./main.md)

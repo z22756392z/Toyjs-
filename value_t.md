@@ -1,4 +1,4 @@
-[Type](./Type.txt) 所有的類型
+[Type](./Type.md) 所有的類型
 
 ## value_t
 

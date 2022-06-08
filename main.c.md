@@ -10,7 +10,7 @@
 
 ----
 
-先看 [value_t](./value_t.txt)  這是Toyjs自訂的類型
+先看 [value_t](./value_t.md)  這是Toyjs自訂的類型
 
 ## Main.c
 
