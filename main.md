@@ -68,7 +68,7 @@ void *xmalloc(size_t size) {
 value_t eval_source(const char *source) {
     value_t compile_func = import_builtin_compiler_module();//拿到已經放好func的scope
     if (!v_is_func(compile_func)) {
-        die("the builtin compiler module must export a function"); //錯誤回報 並來開程式
+        die("the builtin compiler module must export a function"); //錯誤回報 並離開程式
     }
 
     value_t compiled_funcs = call_func(compile_func, v_string(source));
@@ -148,11 +148,12 @@ static value_t get_global_scope(void) {
 
 ```c
 static value_t import_nodejs_module(value_t file_func, value_t global_scope) {
+    //有了用value_t包裝好的檔案 和 scope後
     value_t exports = v_dict();
     value_t module = v_dict();
     v_set(module, v_string("exports"), exports);
-    v_set(global_scope, v_string("module"), module);
-    eval_func(file_func, global_scope);
+    v_set(global_scope, v_string("module"), module);//先把module和exports裝在scope裡
+    eval_func(file_func, global_scope);  //再把用value_t包裝好的檔案 一一把裡面的函式 放到scope中
     return v_get(module, v_string("exports"));
 }
 ```
@@ -163,7 +164,7 @@ static value_t import_nodejs_module(value_t file_func, value_t global_scope) {
 
 主要依靠scope,value_t 和stack_t的幫助來執行
 
-* scope 儲存已經宣告過的東西, ex: 拿之前宣告的變數"a" 遍例scope找key == "a"
+* scope 儲存已經宣告過的東西, ex: 拿之前宣告的變數"a" 遍歷scope找key == "a"
 * value_t 所有的資料都是使用 value_t儲存
 * stack_t 放暫時的value_t
 
@@ -376,6 +377,8 @@ value_t eval_func(value_t funcv, value_t scope) {
 
 
 
+以下是跑圖片是寫到charIsInRange 函式加載好
+
 對應 compiler_code.c中的func0的code
 
 ```c
@@ -399,8 +402,6 @@ static compiled_func_t func0 = {
     .
   }
 ```
-
-以下是跑圖片是寫到charIsInRange 函式加載好
 
 ```js
 // compiler.js
@@ -479,7 +480,7 @@ TODO:how func return
 
 **import_nodejs_module**
 
-分析好file_func之後 有了把source code轉成opcode的能力了 這個能力(函式)儲存在scope中
+放好file_func在scope之後 有了把source code轉成opcode的能力了 這個能力(函式)儲存在scope中的key == "codegen"
 
 exports 可以藉由 scope_lookup 拿到那個能力(函式)
 
@@ -497,8 +498,6 @@ static value_t scope_lookup(value_t scope, const char *name) {
     return v_null;
 }
 ```
-
-
 
 ```c
 static value_t import_nodejs_module(value_t file_func, value_t global_scope) {
@@ -522,7 +521,7 @@ static value_t import_nodejs_module(value_t file_func, value_t global_scope) {
 
 
 value_t eval_source(const char *source) {
-    value_t compile_func = import_builtin_compiler_module();
+    value_t compile_func = import_builtin_compiler_module(); //有了轉source code 成opcode的函式
     if (!v_is_func(compile_func)) {
         die("the builtin compiler module must export a function"); //錯誤回報 並來開程式
     }
