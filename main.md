@@ -476,43 +476,49 @@ TODO:how func return
 
 ![Big-Endian.svg](https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Big-Endian.svg/280px-Big-Endian.svg.png)
 
+在 func0的函式的最後面
 
+```
+//載入func74
+    /* 312 */ opcode_load_func,
+    /* 313 */ 0,
+    /* 314 */ 74,
+    /* 315 */ opcode_dup,
+//在scope中找key為"module" 並回傳其值
+    /* 316 */ opcode_load_const,
+    /* 317 */ 0,
+    /* 318 */ 64,
+    /* 319 */ opcode_load_var,
+//載入 名稱"exports"
+    /* 320 */ opcode_load_const,
+    /* 321 */ 0,
+    /* 322 */ 65,
+// 在module中找key為"exports" 回傳其值 把它改成 裝有func74的value_t
+    /* 323 */ opcode_set,
+```
+
+```js
+//func74
+function (source) {
+    return codegen(parse(source));
+};
+```
 
 **import_nodejs_module**
 
-放好file_func在scope之後 有了把source code轉成opcode的能力了 這個能力(函式)儲存在scope中的key == "codegen"
-
-exports 可以藉由 scope_lookup 拿到那個能力(函式)
-
-之後只要把source code轉opcode 利用eval_func在執行剛剛轉的opcode就好了
-
-```c
-static value_t scope_lookup(value_t scope, const char *name) {
-    if (dict_has(&scope.object->dict, name)) {
-        return scope;
-    }
-    value_t parent = dict_get(&scope.object->dict, "<parent>");
-    if (!v_is_null(parent)) {
-        return scope_lookup(parent, name);
-    }
-    return v_null;
-}
-```
+回傳exports (現在裡面的值式func74), 也就是只要執行他就能把從main拿到的file轉成opcode
 
 ```c
 static value_t import_nodejs_module(value_t file_func, value_t global_scope) {
+    //有了用value_t包裝好的檔案 和 scope後
     value_t exports = v_dict();
     value_t module = v_dict();
     v_set(module, v_string("exports"), exports);
-    v_set(global_scope, v_string("module"), module);
-    eval_func(file_func, global_scope);
+    v_set(global_scope, v_string("module"), module);//先把module和exports裝在scope裡
+    eval_func(file_func, global_scope);  //再把用value_t包裝好的檔案 一一把裡面的函式 放到scope中
     return v_get(module, v_string("exports"));
 }
 ```
-
-目前scope的樣子
-
-
 
 **eval_source**
 
@@ -521,18 +527,20 @@ static value_t import_nodejs_module(value_t file_func, value_t global_scope) {
 
 
 value_t eval_source(const char *source) {
-    value_t compile_func = import_builtin_compiler_module(); //有了轉source code 成opcode的函式
+    value_t compile_func = import_builtin_compiler_module(); //有了轉js檔 成opcode的函式
     if (!v_is_func(compile_func)) {
         die("the builtin compiler module must export a function"); //錯誤回報 並來開程式
     }
 
-    value_t compiled_funcs = call_func(compile_func, v_string(source));
+    value_t compiled_funcs = call_func(compile_func, v_string(source));//把source 轉成opcode
+    //改成合適的結構
     compiled_file_t *file = translate_compiled_file(compiled_funcs);
     value_t func = {
         .type = value_type_object,
         .object = new_compiled_func_object(file->funcs),
     };
-    value_t result = eval_func(func, get_global_scope());
+    
+    value_t result = eval_func(func, get_global_scope());//執行他
     free_compiled_file(file);
     collect_garbage();
     return result;
