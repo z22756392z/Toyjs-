@@ -6,7 +6,7 @@
 
 ## ./toy file
 
-![image-20220608154224644](C:\Users\z22756392z\AppData\Roaming\Typora\typora-user-images\image-20220608154224644.png)
+![image-20220608154224644](./image/toy.png)
 
 ----
 
